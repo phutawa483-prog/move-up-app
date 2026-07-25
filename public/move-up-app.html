@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MOVE UP — Sport Coaching App</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root{
+  --ink:#0B0F14;
+  --ink-soft:#151B22;
+  --paper:#F5F2E9;
+  --card:#FFFFFF;
+  --volt:#D6FA2E;
+  --volt-dim:#AACB1E;
+  --coral:#FF5A3C;
+  --steel:#6E7480;
+  --line:#E7E2D4;
+}
+*{box-sizing:border-box;}
+body{
+  font-family:'Space Grotesk',sans-serif;
+  background:var(--paper);
+  color:var(--ink);
+  margin:0;
+}
+.f-display{font-family:'Anton',sans-serif; letter-spacing:.01em;}
+.f-mono{font-family:'JetBrains Mono',monospace;}
+.hide-scrollbar::-webkit-scrollbar{display:none;}
+.hide-scrollbar{-ms-overflow-style:none;scrollbar-width:none;}
+
+/* signature slash mark */
+.slash-mark{display:inline-flex;align-items:flex-end;gap:3px;height:26px;}
+.slash-mark span{display:block;width:6px;border-radius:2px;transform:skewX(-16deg);}
+.slash-mark span:nth-child(1){height:10px;background:var(--ink);}
+.slash-mark span:nth-child(2){height:17px;background:var(--coral);}
+.slash-mark span:nth-child(3){height:26px;background:var(--volt);}
+.slash-mark.on-dark span:nth-child(1){background:#F5F2E9;opacity:.35;}
+
+.slash-corner{position:absolute;top:10px;left:10px;display:flex;gap:2px;align-items:flex-end;z-index:2;}
+.slash-corner span{width:4px;border-radius:1px;transform:skewX(-16deg);}
+.slash-corner span:nth-child(1){height:6px;background:rgba(255,255,255,.5)}
+.slash-corner span:nth-child(2){height:10px;background:var(--coral)}
+.slash-corner span:nth-child(3){height:14px;background:var(--volt)}
+
+.ring{border-radius:9999px;display:flex;align-items:center;justify-content:center;position:relative;}
+.ring::after{content:'';position:absolute;border-radius:9999px;}
+
+.btn-volt{background:var(--volt);color:var(--ink);font-weight:700;}
+.btn-volt:hover{background:var(--volt-dim);}
+.btn-ink{background:var(--ink);color:var(--paper);}
+button{cursor:pointer;-webkit-tap-highlight-color:transparent;}
+button:active{transform:scale(0.97);}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;}
+
+.chip{border:1.5px solid var(--line);border-radius:14px;cursor:pointer;}
+.chip.active{border-color:var(--ink);background:var(--ink);color:var(--paper);}
+
+.bottom-btn{color:#A8ACB3;}
+.bottom-btn.active{color:var(--ink);}
+.bottom-btn.active .b-pill{background:var(--volt);}
+
+.b-pill{position:absolute;inset:0;border-radius:12px;z-index:-1;transform:scale(0);transition:transform .18s ease;}
+.bottom-btn.active .b-pill{transform:scale(1);}
+
+.field{border:1.5px solid var(--line);border-radius:12px;background:#fff;}
+.field:focus-within{border-color:var(--ink);}
+
+.progress-track{background:rgba(255,255,255,.14);}
+
+.fav-star.is-fav{color:var(--coral);}
+
+#toast{
+  position:fixed;left:50%;bottom:92px;transform:translateX(-50%) translateY(20px);
+  background:var(--ink);color:var(--paper);font-size:12.5px;font-weight:600;
+  padding:10px 18px;border-radius:999px;opacity:0;pointer-events:none;
+  transition:opacity .2s ease, transform .2s ease;z-index:60;white-space:nowrap;
+  box-shadow:0 8px 24px rgba(0,0,0,.25);
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+::selection{background:var(--volt);color:var(--ink);}
+</style>
+</head>
+<body>
+
+<div class="min-h-screen">
+
+  <!-- MAIN -->
+  <div id="app-content" class="overflow-y-auto hide-scrollbar pb-24" style="height:100vh;">
+
+    <!-- 1. SPLASH -->
+    <div id="screen-splash" class="screen min-h-screen flex flex-col justify-between items-center p-8 text-center" style="background:var(--ink);color:var(--paper);">
+      <div></div>
+      <div class="flex flex-col items-center">
+        <div class="slash-mark on-dark mb-6 scale-150"><span></span><span></span><span></span></div>
+        <h1 class="f-display text-6xl leading-none">MOVE UP</h1>
+        <p class="f-mono text-xs tracking-[0.35em] mt-4" style="color:var(--volt);">TRAIN — PRACTICE — IMPROVE</p>
+      </div>
+      <div class="w-full max-w-sm">
+        <p class="text-sm font-light opacity-70 mb-6">ฝึกวันนี้ เพื่อเป็นนักกีฬาที่ดีกว่าในวันพรุ่งนี้</p>
+        <button onclick="navigateTo('screen-onboarding')" class="w-full btn-volt py-4 rounded-2xl text-sm">เริ่มต้นใช้งาน</button>
+      </div>
+    </div>
+
+    <!-- 2. ONBOARDING -->
+    <div id="screen-onboarding" class="screen hidden min-h-screen flex flex-col justify-between p-6" style="background:var(--ink);color:var(--paper);">
+      <div class="flex-1 flex flex-col items-center justify-center gap-10 max-w-md mx-auto w-full">
+        <div class="w-full aspect-[4/5] rounded-[28px] relative overflow-hidden flex items-center justify-center" style="background:var(--ink-soft);">
+          <div class="slash-corner"><span></span><span></span><span></span></div>
+          <i class="fa-solid fa-person-running text-9xl" style="color:var(--volt);opacity:.5;"></i>
+        </div>
+        <div class="w-full text-center">
+          <h2 class="f-display text-4xl mb-3">เรียนรู้ ฝึกฝน<br>พัฒนาตัวเอง</h2>
+          <p class="opacity-60 text-sm leading-relaxed">เรียนทักษะพื้นฐานจากคลิปสั้น และรับคำแนะนำเป๊ะๆ จาก AI โค้ชส่วนตัวที่วิเคราะห์ท่าทางของคุณโดยเฉพาะ</p>
+          <div class="flex gap-1.5 mt-6 justify-center">
+            <span class="w-6 h-1.5 rounded-full" style="background:var(--volt);"></span>
+            <span class="w-1.5 h-1.5 rounded-full" style="background:var(--steel);"></span>
+            <span class="w-1.5 h-1.5 rounded-full" style="background:var(--steel);"></span>
+          </div>
+        </div>
+      </div>
+      <button onclick="navigateTo('screen-select-sport')" class="w-full max-w-sm mx-auto btn-volt py-4 rounded-2xl text-sm">ถัดไป</button>
+    </div>
+
+    <!-- 3. SELECT SPORT -->
+    <div id="screen-select-sport" class="screen hidden min-h-screen flex flex-col justify-between p-6">
+      <div class="max-w-md mx-auto w-full">
+        <div class="slash-mark mb-5"><span></span><span></span><span></span></div>
+        <h2 class="f-display text-3xl mb-1">เลือกกีฬาที่คุณสนใจ</h2>
+        <p class="text-sm mb-8" style="color:var(--steel);">เปลี่ยนหรือเลือกเพิ่มได้ภายหลัง</p>
+        <div class="grid grid-cols-3 gap-3">
+          <button onclick="selectSport(this)" class="sport-btn chip active p-5 flex flex-col items-center gap-2">
+            <i class="fa-solid fa-futbol text-2xl"></i><span class="text-xs font-semibold">ฟุตบอล</span>
+          </button>
+          <button onclick="selectSport(this)" class="sport-btn chip p-5 flex flex-col items-center gap-2">
+            <i class="fa-solid fa-volleyball text-2xl"></i><span class="text-xs font-semibold">วอลเลย์บอล</span>
+          </button>
+          <button onclick="selectSport(this)" class="sport-btn chip p-5 flex flex-col items-center gap-2">
+            <i class="fa-solid fa-basketball text-2xl"></i><span class="text-xs font-semibold">บาสเกตบอล</span>
+          </button>
+        </div>
+        <p class="text-center text-xs mt-5" style="color:var(--steel);">กีฬาอื่นๆ เร็วๆ นี้</p>
+      </div>
+      <button onclick="navigateTo('screen-login')" class="w-full max-w-md mx-auto btn-ink py-4 rounded-2xl text-sm mt-8">เริ่มใช้งาน</button>
+    </div>
+
+    <!-- 4. LOGIN -->
+    <div id="screen-login" class="screen hidden min-h-screen flex flex-col justify-center p-6">
+      <div class="max-w-sm mx-auto w-full">
+        <div class="slash-mark mb-6"><span></span><span></span><span></span></div>
+        <h2 class="f-display text-3xl mb-2">ยินดีต้อนรับ</h2>
+        <p class="text-sm mb-8" style="color:var(--steel);">เข้าสู่ระบบเพื่อเริ่มฝึกฝน</p>
+        <p class="text-xs mb-5" style="color:var(--steel);">กรอกครั้งแรกเพื่อสร้างบัญชีบนอุปกรณ์นี้ ครั้งถัดไประบบจะตรวจอีเมลและรหัสผ่านที่บันทึกไว้</p>
+        <form onsubmit="handleLogin(event)" class="space-y-3">
+          <div class="field px-4 py-3"><input id="login-name" placeholder="ชื่อที่ต้องการแสดง" autocomplete="name" oninput="updateProfilePreview(this.value)" class="w-full bg-transparent outline-none text-sm"></div>
+          <div class="field px-4 py-3"><input id="login-email" placeholder="อีเมล" type="email" autocomplete="email" required class="w-full bg-transparent outline-none text-sm"></div>
+          <div class="field px-4 py-3"><input id="login-password" placeholder="รหัสผ่าน (อย่างน้อย 4 ตัว)" type="password" autocomplete="current-password" minlength="4" required class="w-full bg-transparent outline-none text-sm"></div>
+          <button type="submit" class="w-full btn-ink py-4 rounded-2xl text-sm mt-3">เข้าสู่ระบบ / สมัครสมาชิก</button>
+        </form>
+        <p class="text-center text-xs mt-5" style="color:var(--steel);">ข้อมูลเข้าสู่ระบบจะเก็บไว้เฉพาะเบราว์เซอร์เครื่องนี้</p>
+      </div>
+    </div>
+
+    <!-- 5. DASHBOARD -->
+    <div id="screen-dashboard" class="screen hidden p-5">
+      <div class="max-w-lg mx-auto">
+        <div class="flex justify-between items-center mb-7">
+          <div class="flex items-center gap-3">
+            <button data-profile-initial onclick="navigateTo('screen-profile')" class="w-12 h-12 rounded-full flex items-center justify-center f-mono font-bold text-white" style="background:var(--ink);">ส</button>
+            <div>
+              <h3 data-profile-greeting class="font-bold text-base">สวัสดี สรัสวดี ตัวจริง!</h3>
+              <p class="text-xs" style="color:var(--steel);">พร้อมพัฒนาตัวเองหรือยัง ?</p>
+            </div>
+          </div>
+          <button onclick="toggleBell(this)" class="w-10 h-10 rounded-full field flex items-center justify-center relative">
+            <i class="fa-regular fa-bell"></i>
+            <span class="bell-dot hidden absolute top-2 right-2 w-1.5 h-1.5 rounded-full" style="background:var(--coral);"></span>
+          </button>
+        </div>
+
+        <div class="grid gap-5">
+          <div class="rounded-[24px] p-6 relative overflow-hidden" style="background:var(--ink);color:var(--paper);">
+            <div class="slash-corner"><span></span><span></span><span></span></div>
+            <div class="flex justify-between items-center">
+              <div>
+                <span class="text-xs opacity-60 f-mono">ต่อเนื่อง</span>
+                <p class="f-display text-5xl mt-1">12 <span class="text-lg font-normal opacity-60">วัน</span></p>
+                <p class="text-xs opacity-60 mt-3">เป้าหมายสัปดาห์นี้: 5 ครั้ง</p>
+              </div>
+              <div class="ring w-24 h-24" style="background:conic-gradient(var(--volt) 0deg 270deg, rgba(255,255,255,.14) 270deg 360deg);">
+                <div class="w-[76px] h-[76px] rounded-full flex items-center justify-center f-mono font-bold text-lg" style="background:var(--ink);color:var(--volt);">75%</div>
+              </div>
+            </div>
+          </div>
+          <div class="card rounded-[24px] p-6 flex items-center justify-between">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:var(--coral);color:white;"><i class="fa-solid fa-fire"></i></div>
+            <div class="text-right">
+              <p class="f-display text-3xl">36</p>
+              <p class="text-xs" style="color:var(--steel);">ชั่วโมงฝึกสะสม</p>
+            </div>
+          </div>
+        </div>
+
+        <h4 class="font-bold text-sm mt-8 mb-3">แนะนำสำหรับคุณ</h4>
+        <div id="recommended-list" class="grid gap-4"></div>
+      </div>
+    </div>
+
+    <!-- 6. SKILLS -->
+    <div id="screen-skills" class="screen hidden p-5">
+      <div class="max-w-lg mx-auto">
+        <h3 class="f-display text-3xl mb-4">คลิปสอนทักษะ</h3>
+        <div class="flex gap-2 overflow-x-auto hide-scrollbar mb-6 text-xs">
+          <button onclick="filterSkill(this, 'all')" class="skill-chip chip active px-5 py-2.5 whitespace-nowrap font-medium">ทั้งหมด</button>
+          <button onclick="filterSkill(this, 'football')" class="skill-chip chip px-5 py-2.5 whitespace-nowrap font-medium">ฟุตบอล</button>
+          <button onclick="filterSkill(this, 'basketball')" class="skill-chip chip px-5 py-2.5 whitespace-nowrap font-medium">บาสเกตบอล</button>
+          <button onclick="filterSkill(this, 'volleyball')" class="skill-chip chip px-5 py-2.5 whitespace-nowrap font-medium">วอลเลย์บอล</button>
+        </div>
+        <div id="skills-list" class="grid gap-3">
+          <div data-sport="football" onclick="navigateTo('screen-video-detail')" class="skill-card card p-3 flex gap-3 cursor-pointer hover:shadow-md transition">
+            <div class="w-28 h-20 rounded-xl relative overflow-hidden flex items-center justify-center flex-shrink-0"><img src="assets/football-training.png" alt="ฝึกเลี้ยงบอลฟุตบอล" class="w-full h-full object-cover"><i class="fa-solid fa-play absolute text-white text-xs drop-shadow"></i><span class="absolute bottom-1 right-1 f-mono text-white text-[9px] px-1 rounded" style="background:rgba(0,0,0,.6);">06:30</span></div>
+            <div class="flex-1 flex flex-col justify-center"><h5 class="text-sm font-bold">ฝึกเลี้ยงบอลและคอนโทรลบอล</h5><span class="text-[11px] mt-1" style="color:var(--steel);">ฟุตบอล · ระดับพื้นฐาน</span></div>
+            <button onclick="event.stopPropagation();toggleFav(this)" class="fav-star self-center pr-1"><i class="fa-regular fa-star"></i></button>
+          </div>
+          <div data-sport="football" onclick="navigateTo('screen-video-detail')" class="skill-card card p-3 flex gap-3 cursor-pointer hover:shadow-md transition">
+            <div class="w-28 h-20 rounded-xl relative overflow-hidden flex items-center justify-center flex-shrink-0"><img src="assets/football-match.png" alt="การจ่ายบอลฟุตบอล" class="w-full h-full object-cover"><i class="fa-solid fa-play absolute text-white text-xs drop-shadow"></i><span class="absolute bottom-1 right-1 f-mono text-white text-[9px] px-1 rounded" style="background:rgba(0,0,0,.6);">04:15</span></div>
+            <div class="flex-1 flex flex-col justify-center"><h5 class="text-sm font-bold">เทคนิคการจ่ายบอลในเกม</h5><span class="text-[11px] mt-1" style="color:var(--steel);">ฟุตบอล · ระดับพื้นฐาน</span></div>
+            <button onclick="event.stopPropagation();toggleFav(this)" class="fav-star is-fav self-center pr-1"><i class="fa-solid fa-star"></i></button>
+          </div>
+          <div data-sport="basketball" onclick="navigateTo('screen-video-detail')" class="skill-card card p-3 flex gap-3 cursor-pointer hover:shadow-md transition">
+            <div class="w-28 h-20 rounded-xl relative overflow-hidden flex items-center justify-center flex-shrink-0"><img src="assets/basketball-dribble.png" alt="ฝึกเลี้ยงบอลบาสเกตบอล" class="w-full h-full object-cover"><i class="fa-solid fa-play absolute text-white text-xs drop-shadow"></i><span class="absolute bottom-1 right-1 f-mono text-white text-[9px] px-1 rounded" style="background:rgba(0,0,0,.6);">08:20</span></div>
+            <div class="flex-1 flex flex-col justify-center"><h5 class="text-sm font-bold">เลี้ยงบอลหลบคู่ต่อสู้</h5><span class="text-[11px] mt-1" style="color:var(--steel);">บาสเกตบอล · ระดับกลาง</span></div>
+            <button onclick="event.stopPropagation();toggleFav(this)" class="fav-star self-center pr-1"><i class="fa-regular fa-star"></i></button>
+          </div>
+          <div data-sport="basketball" onclick="navigateTo('screen-video-detail')" class="skill-card card p-3 flex gap-3 cursor-pointer hover:shadow-md transition">
+            <div class="w-28 h-20 rounded-xl relative overflow-hidden flex items-center justify-center flex-shrink-0"><img src="assets/basketball-shot.png" alt="การทำคะแนนใต้แป้นบาสเกตบอล" class="w-full h-full object-cover"><i class="fa-solid fa-play absolute text-white text-xs drop-shadow"></i><span class="absolute bottom-1 right-1 f-mono text-white text-[9px] px-1 rounded" style="background:rgba(0,0,0,.6);">05:45</span></div>
+            <div class="flex-1 flex flex-col justify-center"><h5 class="text-sm font-bold">การทำคะแนนใต้แป้น</h5><span class="text-[11px] mt-1" style="color:var(--steel);">บาสเกตบอล · ระดับกลาง</span></div>
+            <button onclick="event.stopPropagation();toggleFav(this)" class="fav-star self-center pr-1"><i class="fa-regular fa-star"></i></button>
+          </div>
+          <div data-sport="volleyball" onclick="navigateTo('screen-video-detail')" class="skill-card card p-3 flex gap-3 cursor-pointer hover:shadow-md transition">
+            <div class="w-28 h-20 rounded-xl relative overflow-hidden flex items-center justify-center flex-shrink-0"><img src="assets/volleyball-receive.png" alt="การรับเสิร์ฟวอลเลย์บอล" class="w-full h-full object-cover"><i class="fa-solid fa-play absolute text-white text-xs drop-shadow"></i><span class="absolute bottom-1 right-1 f-mono text-white text-[9px] px-1 rounded" style="background:rgba(0,0,0,.6);">07:10</span></div>
+            <div class="flex-1 flex flex-col justify-center"><h5 class="text-sm font-bold">การรับเสิร์ฟพื้นฐาน</h5><span class="text-[11px] mt-1" style="color:var(--steel);">วอลเลย์บอล · ระดับพื้นฐาน</span></div>
+            <button onclick="event.stopPropagation();toggleFav(this)" class="fav-star self-center pr-1"><i class="fa-regular fa-star"></i></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7. VIDEO DETAIL -->
+    <div id="screen-video-detail" class="screen hidden min-h-screen" style="background:var(--ink);color:var(--paper);">
+      <div class="max-w-md mx-auto">
+        <div class="relative aspect-video flex items-center justify-center" style="background:var(--ink-soft);">
+          <button onclick="navigateTo('screen-skills')" class="absolute top-4 left-4 w-9 h-9 rounded-full flex items-center justify-center" style="background:rgba(255,255,255,.1);"><i class="fa-solid fa-chevron-left"></i></button>
+          <div class="slash-corner" style="top:auto;bottom:14px;left:auto;right:14px;"><span></span><span></span><span></span></div>
+          <button onclick="showToast('กำลังเล่นวิดีโอ...')" class="text-6xl" style="color:var(--volt);"><i class="fa-solid fa-circle-play"></i></button>
+        </div>
+        <div class="p-6 flex flex-col justify-between">
+          <div>
+            <h3 class="f-display text-2xl mb-3">การเลี้ยงบอลพื้นฐาน</h3>
+            <p class="text-sm opacity-60 leading-relaxed mb-5">เรียนรู้การเลี้ยงบอลพื้นฐานด้วยข้างเท้าด้านใน เหมาะสำหรับผู้เริ่มต้น ฝึกควบคุมทิศทางและความเร็ว</p>
+            <div class="space-y-2.5 text-sm mb-6">
+              <div class="flex items-center gap-2.5"><i class="fa-solid fa-circle-check" style="color:var(--volt);"></i><span>ควบคุมบอลด้วยเท้าด้านใน</span></div>
+              <div class="flex items-center gap-2.5"><i class="fa-solid fa-circle-check" style="color:var(--volt);"></i><span>รักษาทรงตัวให้ดี</span></div>
+              <div class="flex items-center gap-2.5"><i class="fa-solid fa-circle-check" style="color:var(--volt);"></i><span>มองล่วงหน้าเสมอ</span></div>
+            </div>
+          </div>
+          <button onclick="navigateTo('screen-record')" class="w-full btn-volt py-4 rounded-2xl text-sm flex items-center justify-center gap-2"><i class="fa-solid fa-camera"></i> เริ่มฝึกตามคลิปนี้</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 8. RECORD -->
+    <div id="screen-record" class="screen hidden relative min-h-screen flex flex-col justify-between p-6" style="background:#000;color:#fff;">
+      <video id="camera-preview" autoplay muted playsinline class="absolute inset-0 w-full h-full object-cover hidden"></video>
+      <div id="camera-state" class="absolute inset-0 flex flex-col items-center justify-center gap-4 text-center px-8" style="background:#000;">
+        <i class="fa-solid fa-camera text-4xl" style="color:var(--volt);"></i>
+        <p id="camera-state-text" class="text-sm">กำลังเปิดกล้อง...</p>
+        <button id="retry-camera" onclick="startCamera(true)" class="hidden border border-white/30 rounded-xl px-4 py-2 text-xs">ลองเปิดกล้องอีกครั้ง</button>
+      </div>
+      <div class="flex justify-between items-center z-10 max-w-md mx-auto w-full pointer-events-none">
+        <span id="record-status" class="f-mono text-xs px-3 py-1.5 rounded-full flex items-center gap-2" style="background:rgba(255,255,255,.15);">
+          <span id="record-dot" class="w-2 h-2 rounded-full bg-white"></span><span id="record-timer">00:00</span>
+        </span>
+        <button onclick="navigateTo('screen-video-detail')" class="text-lg opacity-80 pointer-events-auto"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="absolute inset-0 flex items-center justify-center opacity-25 pointer-events-none">
+        <i class="fa-solid fa-person-running text-[220px]" style="color:var(--volt);"></i>
+      </div>
+      <div id="countdown-overlay" class="hidden absolute inset-0 z-20 flex flex-col items-center justify-center text-center" style="background:rgba(0,0,0,.62);">
+        <span class="text-sm font-semibold mb-3">เริ่มบันทึกใน</span>
+        <span id="countdown-number" class="f-display text-8xl" style="color:var(--volt);">5</span>
+      </div>
+      <div class="z-10 text-center space-y-5 max-w-sm mx-auto w-full">
+        <p id="record-message" class="f-mono py-2 px-4 rounded-full text-xs inline-block" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);">แตะปุ่มเพื่อเริ่มบันทึกวิดีโอ</p>
+        <div class="flex justify-center items-center">
+          <button id="record-button" onclick="toggleRecording()" aria-label="เริ่มบันทึกวิดีโอ" class="w-16 h-16 rounded-full border-4 border-white flex items-center justify-center text-xl" style="background:var(--coral);">
+            <i class="fa-solid fa-video"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 9. SCORE -->
+    <div id="screen-score" class="screen hidden p-5 min-h-screen flex flex-col justify-between">
+      <div class="max-w-sm mx-auto w-full">
+        <h3 class="text-center f-display text-2xl mb-6">ผลการวิเคราะห์</h3>
+        <div class="flex flex-col items-center mb-8">
+          <div class="ring w-32 h-32" style="background:conic-gradient(var(--ink) 0deg 306deg, var(--line) 306deg 360deg);">
+            <div class="w-[104px] h-[104px] rounded-full flex flex-col items-center justify-center bg-white">
+              <span id="analysis-score" class="f-display text-4xl">85</span>
+              <span class="text-[10px] f-mono" style="color:var(--steel);">/ 100</span>
+            </div>
+          </div>
+          <p id="analysis-headline" class="font-bold mt-3">พร้อมวิเคราะห์คลิปของคุณ</p>
+        </div>
+        <div class="space-y-4">
+          <div>
+            <div class="flex justify-between text-xs font-semibold mb-1.5"><span>ชู้ตลง / ทั้งหมด</span><span id="analysis-makes" class="f-mono">0 / 0</span></div>
+            <div class="w-full h-2 rounded-full overflow-hidden" style="background:var(--line);"><div id="analysis-accuracy-bar" class="h-full" style="width:0%;background:var(--volt-dim);"></div></div>
+          </div>
+          <div>
+            <div class="flex justify-between text-xs font-semibold mb-1.5"><span>คะแนนรวม (2 / 3 แต้ม)</span><span id="analysis-points" class="f-mono">0 คะแนน</span></div>
+            <div class="w-full h-2 rounded-full overflow-hidden" style="background:var(--line);"><div id="analysis-points-bar" class="h-full" style="width:0%;background:var(--volt-dim);"></div></div>
+          </div>
+          <div>
+            <div class="flex justify-between text-xs font-semibold mb-1.5"><span>จังหวะการเล่น</span><span id="analysis-rhythm" class="f-mono">0%</span></div>
+            <div class="w-full h-2 rounded-full overflow-hidden" style="background:var(--line);"><div id="analysis-rhythm-bar" class="h-full" style="width:0%;background:var(--volt-dim);"></div></div>
+          </div>
+        </div>
+      </div>
+      <button onclick="showToast('บันทึกผลการฝึกแล้ว');navigateTo('screen-dashboard')" class="w-full max-w-sm mx-auto btn-ink py-4 rounded-2xl text-sm mt-8">บันทึกผลการฝึก</button>
+    </div>
+
+    <!-- 10. AI COACH -->
+    <div id="screen-ai-coach" class="screen hidden p-5 min-h-screen" style="background:var(--ink);color:var(--paper);">
+      <div class="max-w-sm mx-auto">
+        <div class="flex justify-end mb-3">
+          <button onclick="toggleCoachLanguage()" id="language-toggle" class="text-xs font-bold px-3 py-2 rounded-xl" style="background:rgba(255,255,255,.12);color:var(--volt);">EN</button>
+        </div>
+        <div class="flex items-center gap-3 mb-8">
+          <div class="w-11 h-11 rounded-2xl flex items-center justify-center" style="background:var(--volt);color:var(--ink);"><i class="fa-solid fa-brain"></i></div>
+          <div>
+            <h3 class="font-bold text-sm">โค้ช AI MOVE UP</h3>
+            <p class="text-[11px] flex items-center gap-1.5 opacity-60"><span class="w-1.5 h-1.5 rounded-full" style="background:var(--volt);"></span> พร้อมวิเคราะห์</p>
+          </div>
+        </div>
+        <div class="rounded-[24px] p-5 mb-4" style="background:var(--ink-soft);">
+          <h4 class="font-bold text-sm mb-1.5">วิเคราะห์ทักษะของคุณ</h4>
+          <p class="text-xs opacity-60 leading-relaxed mb-4">ส่งวิดีโอให้ AI ช่วยวิเคราะห์ท่าทางและให้คำแนะนำเจาะลึกเฉพาะบุคคล</p>
+          <button onclick="navigateTo('screen-upload')" class="w-full btn-volt py-3 rounded-xl text-xs font-semibold">ส่งวิดีโอ</button>
+        </div>
+        <button onclick="showToast('ฟีเจอร์แชทกับ AI จะเปิดให้ใช้งานเร็วๆ นี้')" class="w-full rounded-[24px] p-4 flex items-center gap-3 text-left" style="background:var(--ink-soft);">
+          <i class="fa-solid fa-comment-dots" style="color:var(--volt);"></i>
+          <div class="flex-1">
+            <p class="text-xs font-semibold">ถาม-ตอบ กับ AI ได้ทันที</p>
+            <p class="text-[11px] opacity-50">มีคำถามเกี่ยวกับการฝึก? ถามได้เลย</p>
+          </div>
+          <i class="fa-solid fa-chevron-right text-xs opacity-40"></i>
+        </button>
+        <div class="rounded-[24px] p-4 mt-4" style="background:var(--ink-soft);">
+          <div class="flex items-center gap-2 mb-3"><i class="fa-solid fa-comment-dots" style="color:var(--volt);"></i><p id="chat-title" class="text-xs font-semibold">ถามโค้ช AI ได้ทันที</p></div>
+          <div id="coach-messages" class="space-y-3 max-h-64 overflow-y-auto pr-1"></div>
+          <div class="flex flex-wrap gap-2 mt-3">
+            <button type="button" onclick="askCoach('ฟุตบอล')" id="quick-football" class="text-[11px] px-3 py-1.5 rounded-full" style="background:rgba(255,255,255,.12);">ฟุตบอล</button>
+            <button type="button" onclick="askCoach('วอลเลย์บอล')" id="quick-volleyball" class="text-[11px] px-3 py-1.5 rounded-full" style="background:rgba(255,255,255,.12);">วอลเลย์บอล</button>
+            <button type="button" onclick="askCoach('บาสเกตบอล')" id="quick-basketball" class="text-[11px] px-3 py-1.5 rounded-full" style="background:rgba(255,255,255,.12);">บาสเกตบอล</button>
+            <button type="button" onclick="askCoach('คุยอะไรได้บ้าง')" id="quick-help" class="text-[11px] px-3 py-1.5 rounded-full" style="background:rgba(255,255,255,.12);">คุยอะไรได้บ้าง?</button>
+          </div>
+          <form onsubmit="sendCoachMessage(event)" class="flex gap-2 mt-4">
+            <input id="coach-input" class="min-w-0 flex-1 rounded-xl px-3 py-2.5 text-xs outline-none" style="color:var(--ink);" placeholder="พิมพ์สิ่งที่อยากฝึก...">
+            <button class="w-10 rounded-xl btn-volt" type="submit" aria-label="Send"><i class="fa-solid fa-arrow-up"></i></button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- 11. UPLOAD -->
+    <div id="screen-upload" class="screen hidden p-5 min-h-screen flex flex-col justify-between">
+      <div class="max-w-sm mx-auto w-full">
+        <div class="flex items-center gap-2 mb-6">
+          <button onclick="navigateTo('screen-ai-coach')"><i class="fa-solid fa-chevron-left"></i></button>
+          <h3 class="font-bold text-sm">ส่งวิดีโอให้ AI วิเคราะห์</h3>
+        </div>
+        <input id="analysis-video" type="file" accept="video/*" class="hidden" onchange="selectAnalysisVideo(this)">
+        <button onclick="document.getElementById('analysis-video').click()" class="w-full rounded-[24px] p-12 flex flex-col items-center justify-center text-center" style="border:2px dashed var(--line);background:#FCFBF7;">
+          <div class="w-14 h-14 rounded-2xl flex items-center justify-center mb-4" style="background:var(--ink);color:var(--volt);"><i class="fa-solid fa-cloud-arrow-up text-xl"></i></div>
+          <p class="text-sm font-semibold mb-1">แตะเพื่ออัปโหลดคลิป</p>
+          <p id="analysis-file-name" class="text-xs" style="color:var(--steel);">รองรับ MP4, MOV, WebM · แนะนำคลิปสั้นและสว่าง</p>
+        </button>
+      </div>
+      <button id="analysis-button" onclick="analyzeBasketballVideo()" class="w-full max-w-sm mx-auto btn-ink py-4 rounded-2xl text-sm mt-8">เริ่มวิเคราะห์</button>
+    </div>
+
+    <!-- 12. PROFILE -->
+    <div id="screen-profile" class="screen hidden p-5">
+      <div class="max-w-sm mx-auto">
+        <div class="flex flex-col items-center text-center mb-8">
+          <div data-profile-initial class="w-20 h-20 rounded-full flex items-center justify-center f-display text-2xl text-white mb-3" style="background:var(--ink);">ส</div>
+          <h3 data-profile-name class="font-bold text-lg">สรัสวดี ตัวจริง</h3>
+          <p data-profile-email class="text-xs mt-1" style="color:var(--steel);"></p>
+          <span class="text-xs f-mono px-3 py-1 rounded-full mt-1" style="background:var(--volt);color:var(--ink);">LEVEL 12</span>
+        </div>
+        <div class="grid grid-cols-3 gap-3 mb-8">
+          <div class="card p-4 text-center"><p class="f-display text-2xl">36</p><p class="text-[11px]" style="color:var(--steel);">ชั่วโมงฝึก</p></div>
+          <div class="card p-4 text-center"><p class="f-display text-2xl">18</p><p class="text-[11px]" style="color:var(--steel);">ทักษะสำเร็จ</p></div>
+          <div class="card p-4 text-center"><p class="f-display text-2xl">2840</p><p class="text-[11px]" style="color:var(--steel);">คะแนนสะสม</p></div>
+        </div>
+        <div class="card divide-y" style="border-color:var(--line);">
+          <button onclick="showToast('แก้ไขข้อมูลส่วนตัว: ฟีเจอร์นี้จะเปิดให้ใช้งานเร็วๆ นี้')" class="w-full flex items-center justify-between p-4 text-left"><span class="text-sm flex items-center gap-3"><i class="fa-solid fa-user" style="color:var(--steel);"></i>แก้ไขข้อมูลส่วนตัว</span><i class="fa-solid fa-chevron-right text-xs" style="color:var(--steel);"></i></button>
+          <button onclick="showToast('ความสำเร็จ: ฟีเจอร์นี้จะเปิดให้ใช้งานเร็วๆ นี้')" class="w-full flex items-center justify-between p-4 text-left"><span class="text-sm flex items-center gap-3"><i class="fa-solid fa-trophy" style="color:var(--steel);"></i>ความสำเร็จ</span><i class="fa-solid fa-chevron-right text-xs" style="color:var(--steel);"></i></button>
+          <button onclick="showToast('การตั้งค่า: ฟีเจอร์นี้จะเปิดให้ใช้งานเร็วๆ นี้')" class="w-full flex items-center justify-between p-4 text-left"><span class="text-sm flex items-center gap-3"><i class="fa-solid fa-gear" style="color:var(--steel);"></i>การตั้งค่า</span><i class="fa-solid fa-chevron-right text-xs" style="color:var(--steel);"></i></button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- BOTTOM NAV -->
+<div id="bottom-nav" class="fixed bottom-0 left-0 right-0 h-[72px] bg-white flex justify-around items-center px-2 text-[10px] z-40 hidden" style="border-top:1px solid var(--line);">
+  <button onclick="navigateTo('screen-dashboard')" class="bottom-btn active flex flex-col items-center gap-1 relative px-4 py-2" data-nav="screen-dashboard">
+    <span class="b-pill"></span><i class="fa-solid fa-house text-base relative z-10"></i><span class="relative z-10 font-medium">หน้าแรก</span>
+  </button>
+  <button onclick="navigateTo('screen-skills')" class="bottom-btn flex flex-col items-center gap-1 relative px-4 py-2" data-nav="screen-skills">
+    <span class="b-pill"></span><i class="fa-solid fa-clapperboard text-base relative z-10"></i><span class="relative z-10 font-medium">คลิปสอน</span>
+  </button>
+  <button onclick="navigateTo('screen-record')" class="bottom-btn flex flex-col items-center gap-1 relative px-4 py-2" data-nav="screen-record">
+    <span class="b-pill"></span><i class="fa-solid fa-video text-base relative z-10"></i><span class="relative z-10 font-medium">ฝึกฝน</span>
+  </button>
+  <button onclick="navigateTo('screen-ai-coach')" class="bottom-btn flex flex-col items-center gap-1 relative px-4 py-2" data-nav="screen-ai-coach">
+    <span class="b-pill"></span><i class="fa-solid fa-brain text-base relative z-10"></i><span class="relative z-10 font-medium">โค้ช AI</span>
+  </button>
+  <button onclick="navigateTo('screen-profile')" class="bottom-btn flex flex-col items-center gap-1 relative px-4 py-2" data-nav="screen-profile">
+    <span class="b-pill"></span><i class="fa-solid fa-user text-base relative z-10"></i><span class="relative z-10 font-medium">โปรไฟล์</span>
+  </button>
+</div>
+
+<script>
+const navScreens = ['screen-dashboard','screen-skills','screen-record','screen-ai-coach','screen-profile'];
+const chromeless = ['screen-splash','screen-onboarding','screen-select-sport','screen-login'];
+const accountStorageKey = 'moveUpAccount';
+const recommendations = [
+  { title: 'ฝึกเลี้ยงบอลและคอนโทรลบอล', description: 'ควบคุมบอลให้ติดเท้ามากขึ้น', image: 'assets/football-training.png', time: '06:30' },
+  { title: 'เทคนิคการจ่ายบอลในเกม', description: 'จ่ายบอลแม่นยำและอ่านเกมดีขึ้น', image: 'assets/football-match.png', time: '04:15' },
+  { title: 'เลี้ยงบอลหลบคู่ต่อสู้', description: 'เปลี่ยนทิศทางเพื่อผ่านแนวรับ', image: 'assets/basketball-dribble.png', time: '08:20' },
+  { title: 'การทำคะแนนใต้แป้น', description: 'ฝึกจบสกอร์ระยะใกล้', image: 'assets/basketball-shot.png', time: '05:45' },
+  { title: 'การรับเสิร์ฟพื้นฐาน', description: 'รับบอลให้แม่นยำและนิ่งขึ้น', image: 'assets/volleyball-receive.png', time: '07:10' }
+];
+
+function renderRecommendations(){
+  const list = document.getElementById('recommended-list');
+  if (!list) return;
+  const pool = [...recommendations];
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  list.innerHTML = pool.slice(0, 2).map(video => `
+    <div class="card overflow-hidden cursor-pointer" onclick="navigateTo('screen-video-detail')">
+      <div class="h-40 relative overflow-hidden flex items-center justify-center" style="background:var(--ink-soft);">
+        <img src="${video.image}" alt="${video.title}" class="absolute inset-0 w-full h-full object-cover">
+        <div class="absolute inset-0" style="background:linear-gradient(0deg, rgba(11,15,20,.35), rgba(11,15,20,.05));"></div>
+        <div class="slash-corner"><span></span><span></span><span></span></div>
+        <i class="fa-solid fa-circle-play text-4xl relative" style="color:var(--volt);"></i>
+        <span class="absolute bottom-2 right-2 f-mono text-white text-[10px] px-2 py-0.5 rounded" style="background:rgba(0,0,0,.55);">${video.time}</span>
+      </div>
+      <div class="p-4"><h5 class="font-semibold text-sm">${video.title}</h5><p class="text-xs mt-1 mb-3" style="color:var(--steel);">${video.description}</p><button onclick="event.stopPropagation();navigateTo('screen-video-detail')" class="w-full btn-ink text-xs font-semibold py-2.5 rounded-xl">เริ่มฝึก</button></div>
+    </div>`).join('');
+}
+
+function getSavedAccount(){
+  try {
+    const account = JSON.parse(localStorage.getItem(accountStorageKey));
+    return account && account.email && account.password ? account : null;
+  } catch (_) {
+    return null;
+  }
+}
+
+function displayName(name, email){
+  return (name || '').trim() || (email || '').split('@')[0] || 'ผู้ใช้';
+}
+
+function updateProfileUI(name, email){
+  const shownName = displayName(name, email);
+  const initial = Array.from(shownName)[0] || 'ผ';
+  document.querySelectorAll('[data-profile-name]').forEach(el => el.textContent = shownName);
+  document.querySelectorAll('[data-profile-email]').forEach(el => el.textContent = email || '');
+  document.querySelectorAll('[data-profile-initial]').forEach(el => el.textContent = initial);
+  document.querySelectorAll('[data-profile-greeting]').forEach(el => el.textContent = 'สวัสดี ' + shownName + '!');
+}
+
+function updateProfilePreview(name){
+  const email = document.getElementById('login-email')?.value || getSavedAccount()?.email || '';
+  updateProfileUI(name, email);
+}
+
+function fillLoginForm(){
+  const account = getSavedAccount();
+  if (!account) return;
+  document.getElementById('login-name').value = account.name || '';
+  document.getElementById('login-email').value = account.email || '';
+  document.getElementById('login-password').value = account.password || '';
+  updateProfileUI(account.name, account.email);
+}
+
+function handleLogin(event){
+  event.preventDefault();
+  const name = document.getElementById('login-name').value.trim();
+  const email = document.getElementById('login-email').value.trim().toLowerCase();
+  const password = document.getElementById('login-password').value;
+  const saved = getSavedAccount();
+
+  if (!name) return showToast('กรุณากรอกชื่อที่ต้องการแสดง');
+  if (!/^\S+@\S+\.\S+$/.test(email)) return showToast('กรุณากรอกอีเมลให้ถูกต้อง');
+  if (password.length < 4) return showToast('รหัสผ่านต้องมีอย่างน้อย 4 ตัวอักษร');
+  if (saved && saved.email === email && saved.password !== password) return showToast('รหัสผ่านไม่ถูกต้อง');
+
+  localStorage.setItem(accountStorageKey, JSON.stringify({ name, email, password }));
+  updateProfileUI(name, email);
+  showToast(saved && saved.email === email ? 'เข้าสู่ระบบสำเร็จ' : 'บันทึกบัญชีและเข้าสู่ระบบสำเร็จ');
+  navigateTo('screen-dashboard');
+}
+
+function navigateTo(screenId){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
+  const target = document.getElementById(screenId);
+  if(target) target.classList.remove('hidden');
+
+  if (screenId === 'screen-login') fillLoginForm();
+  if (screenId === 'screen-dashboard') renderRecommendations();
+
+  if (screenId === 'screen-record') startCamera();
+  else stopCamera();
+
+  const bottomNav = document.getElementById('bottom-nav');
+  if(chromeless.includes(screenId)){
+    bottomNav.classList.add('hidden');
+  } else {
+    bottomNav.classList.remove('hidden');
+  }
+
+  const highlightId = navScreens.includes(screenId) ? screenId : null;
+  document.querySelectorAll('[data-nav]').forEach(btn=>{
+    btn.classList.toggle('active', btn.dataset.nav === highlightId);
+  });
+
+  document.getElementById('app-content').scrollTo(0,0);
+}
+
+function selectSport(el){
+  document.querySelectorAll('.sport-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function filterSkill(el, sport){
+  document.querySelectorAll('.skill-chip').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.skill-card').forEach(card=>{
+    card.classList.toggle('hidden', sport !== 'all' && card.dataset.sport !== sport);
+  });
+  showToast(sport === 'all' ? 'แสดงคลิปทั้งหมด' : 'กรองตาม: ' + el.textContent.trim());
+}
+
+function toggleFav(btn){
+  btn.classList.toggle('is-fav');
+  const icon = btn.querySelector('i');
+  const isFav = btn.classList.contains('is-fav');
+  icon.classList.toggle('fa-regular', !isFav);
+  icon.classList.toggle('fa-solid', isFav);
+  showToast(isFav ? 'เพิ่มในรายการโปรดแล้ว' : 'นำออกจากรายการโปรดแล้ว');
+}
+
+function toggleBell(btn){
+  const dot = btn.querySelector('.bell-dot');
+  dot.classList.add('hidden');
+  showToast('ยังไม่มีการแจ้งเตือนใหม่');
+}
+
+let toastTimer;
+function showToast(msg){
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>toast.classList.remove('show'), 2200);
+}
+
+let cameraStream = null;
+let mediaRecorder = null;
+let recordedChunks = [];
+let recordingTimer = null;
+let recordingStartedAt = 0;
+let discardRecording = false;
+let countdownTimer = null;
+let countdownActive = false;
+
+function updateRecordingUI(isRecording){
+  const button = document.getElementById('record-button');
+  const icon = button?.querySelector('i');
+  const status = document.getElementById('record-status');
+  const dot = document.getElementById('record-dot');
+  const message = document.getElementById('record-message');
+  if (!button) return;
+  button.setAttribute('aria-label', isRecording ? 'หยุดบันทึกวิดีโอ' : 'เริ่มบันทึกวิดีโอ');
+  icon.className = isRecording ? 'fa-solid fa-stop' : 'fa-solid fa-video';
+  status.style.background = isRecording ? 'var(--coral)' : 'rgba(255,255,255,.15)';
+  dot.className = 'w-2 h-2 rounded-full bg-white' + (isRecording ? ' animate-pulse' : '');
+  message.textContent = isRecording ? 'กำลังบันทึกวิดีโอ... แตะอีกครั้งเพื่อหยุด' : 'แตะปุ่มเพื่อเริ่มบันทึกวิดีโอ';
+}
+
+function updateRecordingTimer(){
+  const seconds = Math.floor((Date.now() - recordingStartedAt) / 1000);
+  const minutes = String(Math.floor(seconds / 60)).padStart(2, '0');
+  const remainder = String(seconds % 60).padStart(2, '0');
+  document.getElementById('record-timer').textContent = `${minutes}:${remainder}`;
+}
+
+function setCameraState(message, retry = false){
+  const state = document.getElementById('camera-state');
+  const text = document.getElementById('camera-state-text');
+  const button = document.getElementById('retry-camera');
+  text.textContent = message;
+  state.classList.remove('hidden');
+  button.classList.toggle('hidden', !retry);
+}
+
+function requestCamera(constraints){
+  return new Promise((resolve, reject) => {
+    let timedOut = false;
+    const timer = setTimeout(() => {
+      timedOut = true;
+      const error = new Error('Camera request timed out');
+      error.name = 'CameraTimeout';
+      reject(error);
+    }, 8000);
+    navigator.mediaDevices.getUserMedia(constraints).then(stream => {
+      clearTimeout(timer);
+      if (timedOut) {
+        stream.getTracks().forEach(track => track.stop());
+        return;
+      }
+      resolve(stream);
+    }).catch(error => {
+      clearTimeout(timer);
+      if (!timedOut) reject(error);
+    });
+  });
+}
+
+async function startCamera(autoStart = false){
+  const preview = document.getElementById('camera-preview');
+  setCameraState('กำลังเปิดกล้อง...');
+  if (!navigator.mediaDevices?.getUserMedia) {
+    setCameraState('เบราว์เซอร์นี้ไม่รองรับกล้อง กรุณาเปิดไฟล์ผ่าน Chrome หรือ Edge เวอร์ชันล่าสุด', true);
+    return;
+  }
+  if (cameraStream) {
+    preview.classList.remove('hidden');
+    document.getElementById('camera-state').classList.add('hidden');
+    return;
+  }
+  try {
+    // Video-only avoids requesting microphone permission when the user only needs to record a training clip.
+    cameraStream = await requestCamera({ video: { facingMode: 'user' }, audio: false });
+    preview.srcObject = cameraStream;
+    await preview.play();
+    preview.classList.remove('hidden');
+    document.getElementById('camera-state').classList.add('hidden');
+  } catch (error) {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(track => track.stop());
+      cameraStream = null;
+    }
+    const reason = error?.name === 'NotAllowedError'
+      ? 'ยังไม่ได้อนุญาตใช้กล้อง: กดไอคอนกล้องข้างแถบที่อยู่ แล้วเลือกอนุญาต'
+      : error?.name === 'NotFoundError'
+        ? 'ไม่พบกล้องในเครื่องนี้ กรุณาเชื่อมต่อกล้องแล้วลองใหม่'
+        : error?.name === 'CameraTimeout'
+          ? 'กล้องไม่ตอบสนองภายใน 8 วินาที: ปิดแอปอื่นที่ใช้กล้อง แล้วกดลองใหม่'
+          : 'เปิดกล้องไม่สำเร็จ กรุณาลองใหม่อีกครั้ง';
+    setCameraState(reason, true);
+  }
+}
+
+async function toggleRecording(){
+  if (mediaRecorder?.state === 'recording') {
+    mediaRecorder.stop();
+    return;
+  }
+  if (countdownActive) return;
+  if (!cameraStream) await startCamera();
+  if (!cameraStream) return;
+  if (!window.MediaRecorder) {
+    showToast('เบราว์เซอร์นี้ยังไม่รองรับการบันทึกวิดีโอ');
+    return;
+  }
+  startRecordingCountdown();
+}
+
+function startRecordingCountdown(){
+  countdownActive = true;
+  let seconds = 5;
+  const overlay = document.getElementById('countdown-overlay');
+  const number = document.getElementById('countdown-number');
+  const message = document.getElementById('record-message');
+  overlay.classList.remove('hidden');
+  number.textContent = seconds;
+  message.textContent = 'เตรียมตัว... จะเริ่มบันทึกอัตโนมัติ';
+  countdownTimer = setInterval(() => {
+    seconds -= 1;
+    if (seconds === 0) {
+      clearInterval(countdownTimer);
+      countdownActive = false;
+      overlay.classList.add('hidden');
+      beginRecording();
+      return;
+    }
+    number.textContent = seconds;
+  }, 1000);
+}
+
+function beginRecording(){
+  const preferredTypes = ['video/mp4;codecs=avc1.42E01E,mp4a.40.2', 'video/mp4', 'video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'];
+  const mimeType = preferredTypes.find(type => MediaRecorder.isTypeSupported(type));
+  try {
+    discardRecording = false;
+    recordedChunks = [];
+    mediaRecorder = mimeType ? new MediaRecorder(cameraStream, { mimeType }) : new MediaRecorder(cameraStream);
+    mediaRecorder.ondataavailable = event => { if (event.data.size) recordedChunks.push(event.data); };
+    mediaRecorder.onstop = saveRecording;
+    mediaRecorder.start();
+    recordingStartedAt = Date.now();
+    updateRecordingTimer();
+    recordingTimer = setInterval(updateRecordingTimer, 500);
+    updateRecordingUI(true);
+  } catch (_) {
+    showToast('เริ่มบันทึกวิดีโอไม่ได้ กรุณาลองใหม่');
+  }
+}
+
+async function saveRecording(){
+  clearInterval(recordingTimer);
+  updateRecordingUI(false);
+  if (discardRecording || !recordedChunks.length) return;
+  const type = mediaRecorder?.mimeType || 'video/webm';
+  const video = new Blob(recordedChunks, { type });
+  const extension = type.includes('mp4') ? 'mp4' : 'webm';
+  const filename = `move-up-training-${Date.now()}.${extension}`;
+  const videoFile = new File([video], filename, { type });
+  analysisVideoFile = videoFile;
+  let sharedToPhotos = false;
+  try {
+    if (navigator.canShare?.({ files: [videoFile] })) {
+      await navigator.share({ files: [videoFile], title: 'MOVE UP Training Video' });
+      sharedToPhotos = true;
+    }
+  } catch (_) {
+    // The user closed the share sheet or the browser did not allow sharing.
+  }
+  if (!sharedToPhotos) {
+    const url = URL.createObjectURL(video);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+  showToast(sharedToPhotos ? 'เลือก “บันทึกวิดีโอ” เพื่อเก็บไว้ในรูปภาพ' : 'บันทึกวิดีโอแล้ว กำลังดาวน์โหลดไฟล์');
+  document.getElementById('analysis-file-name').textContent = `เลือกคลิปแล้ว: ${filename}`;
+  navigateTo('screen-upload');
+}
+
+function stopCamera(){
+  clearInterval(countdownTimer);
+  countdownActive = false;
+  document.getElementById('countdown-overlay')?.classList.add('hidden');
+  const preview = document.getElementById('camera-preview');
+  if (mediaRecorder?.state === 'recording') {
+    discardRecording = true;
+    mediaRecorder.stop();
+  }
+  clearInterval(recordingTimer);
+  updateRecordingUI(false);
+  document.getElementById('record-timer').textContent = '00:00';
+  if (cameraStream) {
+    cameraStream.getTracks().forEach(track => track.stop());
+    cameraStream = null;
+  }
+  if (preview) {
+    preview.srcObject = null;
+    preview.classList.add('hidden');
+  }
+}
+
+// AI coach chat: each message stores both Thai and English so switching languages
+// re-renders the same conversation instead of clearing it.
+let coachLanguage = localStorage.getItem('moveUpCoachLanguage') || 'th';
+let coachMessages;
+try {
+  coachMessages = JSON.parse(localStorage.getItem('moveUpCoachMessages'));
+} catch (_) {
+  coachMessages = null;
+}
+if (!Array.isArray(coachMessages) || !coachMessages.length) {
+  coachMessages = [{
+    role: 'coach',
+    th: 'สวัสดี! วันนี้อยากฝึกอะไรดี? ฉันช่วยวางแบบฝึกสั้น ๆ ให้ได้',
+    en: 'Hi! What would you like to practise today? I can make you a short training plan.'
+  }];
+}
+
+// Reset the old generic demo conversation once, so the improved coach starts clearly.
+if (localStorage.getItem('moveUpCoachVersion') !== '2') {
+  coachMessages = [{
+    role: 'coach',
+    th: 'สวัสดี! ฉันคือ AI Coach ของ MOVE UP ช่วยแนะนำการฝึกฟุตบอล วอลเลย์บอล และบาสเกตบอลได้ พิมพ์ชื่อกีฬา หรือกด “คุยอะไรได้บ้าง?” เพื่อดูตัวอย่างได้เลย',
+    en: 'Hello! I am MOVE UP’s AI Coach. I can help with football, volleyball, and basketball training. Type a sport or tap “What can we talk about?” to see examples.'
+  }];
+  localStorage.setItem('moveUpCoachVersion', '2');
+  localStorage.setItem('moveUpCoachMessages', JSON.stringify(coachMessages));
+}
+
+const coachLabels = {
+  th: { title: 'ถามโค้ช AI ได้ทันที', placeholder: 'พิมพ์สิ่งที่อยากฝึก...' },
+  en: { title: 'Ask your AI coach', placeholder: 'Type what you want to practise...' }
+};
+
+function saveCoachMessages(){
+  localStorage.setItem('moveUpCoachMessages', JSON.stringify(coachMessages));
+}
+
+function renderCoachChat(){
+  const box = document.getElementById('coach-messages');
+  if (!box) return;
+  box.innerHTML = '';
+  coachMessages.forEach(message => {
+    const bubble = document.createElement('div');
+    const isCoach = message.role === 'coach';
+    bubble.className = 'text-xs leading-relaxed rounded-2xl px-3 py-2.5 ' + (isCoach ? 'mr-7' : 'ml-7');
+    bubble.style.background = isCoach ? 'rgba(255,255,255,.10)' : 'var(--volt)';
+    bubble.style.color = isCoach ? 'var(--paper)' : 'var(--ink)';
+    bubble.textContent = message[coachLanguage] || message.th || message.en;
+    box.appendChild(bubble);
+  });
+  box.scrollTop = box.scrollHeight;
+  document.getElementById('language-toggle').textContent = coachLanguage === 'th' ? 'EN' : 'ไทย';
+  document.getElementById('chat-title').textContent = coachLabels[coachLanguage].title;
+  document.getElementById('coach-input').placeholder = coachLabels[coachLanguage].placeholder;
+  document.getElementById('quick-football').textContent = coachLanguage === 'th' ? 'ฟุตบอล' : 'Football';
+  document.getElementById('quick-volleyball').textContent = coachLanguage === 'th' ? 'วอลเลย์บอล' : 'Volleyball';
+  document.getElementById('quick-basketball').textContent = coachLanguage === 'th' ? 'บาสเกตบอล' : 'Basketball';
+  document.getElementById('quick-help').textContent = coachLanguage === 'th' ? 'คุยอะไรได้บ้าง?' : 'What can we talk about?';
+  renderCoachInterface();
+}
+
+function renderCoachInterface(){
+  const screen = document.getElementById('screen-ai-coach');
+  const english = coachLanguage === 'en';
+  const title = screen.querySelector('h3');
+  const status = screen.querySelector('.flex.items-center.gap-3.mb-8 p');
+  const analysisTitle = screen.querySelector('h4');
+  const analysisBody = analysisTitle.nextElementSibling;
+  const uploadButton = analysisBody.nextElementSibling;
+  title.textContent = english ? 'MOVE UP AI Coach' : 'โค้ช AI MOVE UP';
+  status.innerHTML = '<span class="w-1.5 h-1.5 rounded-full" style="background:var(--volt);"></span> ' + (english ? 'Ready to help you train' : 'พร้อมช่วยฝึก');
+  analysisTitle.textContent = english ? 'Analyse your skills' : 'วิเคราะห์ทักษะของคุณ';
+  analysisBody.textContent = english ? 'Send a video and let AI review your movement and recommend what to practise next.' : 'ส่งวิดีโอให้ AI ช่วยดูท่าทางและแนะนำสิ่งที่ควรฝึกต่อ';
+  uploadButton.textContent = english ? 'Upload video' : 'ส่งวิดีโอ';
+  const oldChatButton = screen.querySelector('button[onclick^="showToast"]');
+  oldChatButton.onclick = () => document.getElementById('coach-messages').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  oldChatButton.querySelector('p').textContent = english ? 'Chat with AI now' : 'ถาม-ตอบกับ AI ได้ทันที';
+  oldChatButton.querySelector('p + p').textContent = english ? 'Ask anything about your practice.' : 'มีคำถามเกี่ยวกับการฝึก? ถามได้เลย';
+}
+
+function toggleCoachLanguage(){
+  coachLanguage = coachLanguage === 'th' ? 'en' : 'th';
+  localStorage.setItem('moveUpCoachLanguage', coachLanguage);
+  renderCoachChat();
+}
+
+function askCoach(text){
+  const input = document.getElementById('coach-input');
+  input.value = text;
+  sendCoachMessage({ preventDefault(){} });
+}
+
+function getCoachReply(text){
+  const query = text.toLowerCase().trim();
+  const greeting = ['สวัสดี', 'หวัดดี', 'hello', 'hi', 'hey'];
+  const help = ['คุยอะไรได้บ้าง', 'ช่วยอะไรได้บ้าง', 'ถามอะไรได้บ้าง', 'help', 'what can', 'what do you do'];
+  if (greeting.some(word => query === word || query.startsWith(word + ' '))) return {
+    th: 'สวัสดี! ฉันเป็น AI Coach ที่ช่วยวางแบบฝึกและให้คำแนะนำเบื้องต้นเรื่องฟุตบอล วอลเลย์บอล และบาสเกตบอล ลองพิมพ์ชื่อกีฬา หรือถามว่า “คุยอะไรได้บ้าง?” ได้เลย',
+    en: 'Hello! I am an AI Coach that gives simple training plans and tips for football, volleyball, and basketball. Type a sport or ask “What can we talk about?”'
+  };
+  if (help.some(word => query.includes(word))) return {
+    th: 'ฉันช่วยได้ 3 เรื่อง: ฟุตบอล (เลี้ยงบอลและส่งบอล), วอลเลย์บอล (เซตและรับบอล), และบาสเกตบอล (เลี้ยงบอลและชู้ต) ลองพิมพ์ “ฟุตบอล”, “วอลเลย์บอล” หรือ “บาสเกตบอล” ได้เลย',
+    en: 'I can help with 3 sports: football (dribbling and passing), volleyball (setting and receiving), and basketball (dribbling and shooting). Try typing “football”, “volleyball”, or “basketball”.'
+  };
+  if (query.includes('ฟุตบอล') || query.includes('football')) return {
+    th: 'ฟุตบอล: ลองฝึก 3 รอบ—เลี้ยงบอลช้า ๆ 1 นาที, ส่งบอลกับกำแพง 20 ครั้ง และพัก 30 วินาที เน้นมองขึ้นก่อนส่งบอล',
+    en: 'Football: Try 3 rounds—dribble slowly for 1 minute, make 20 wall passes, then rest 30 seconds. Keep your eyes up before each pass.'
+  };
+  if (query.includes('วอลเลย์') || query.includes('volley')) return {
+    th: 'วอลเลย์บอล: เซตบอลเหนือศีรษะ 20 ครั้ง แล้วฝึกรับลูกกับกำแพง 10 ครั้งต่อข้าง งอเข่าและยกมือให้เร็ว',
+    en: 'Volleyball: Do 20 overhead sets, then practise 10 wall receives on each side. Bend your knees and raise your hands early.'
+  };
+  if (query.includes('บาส') || query.includes('basket')) return {
+    th: 'บาสเกตบอล: เลี้ยงบอลมือซ้ายและขวาข้างละ 30 วินาที แล้วชู้ตระยะใกล้ 10 ลูกต่อข้าง พยายามให้ข้อมือตามลูกบอล',
+    en: 'Basketball: Dribble with each hand for 30 seconds, then take 10 close shots from each side. Let your wrist follow through.'
+  };
+  return {
+    th: 'ขออภัย ฉันไม่เข้าใจสิ่งที่คุณพิมพ์ ตอนนี้ฉันช่วยเรื่องฟุตบอล วอลเลย์บอล และบาสเกตบอลได้ ลองพิมพ์ชื่อกีฬา หรือกด “คุยอะไรได้บ้าง?”',
+    en: 'Sorry, I do not understand what you typed. I can currently help with football, volleyball, and basketball. Type a sport or tap “What can we talk about?”'
+  };
+}
+
+function coachReply(text){
+  const query = text.toLowerCase();
+  if (query.includes('ฟุตบอล') || query.includes('football')) return {
+    th: 'ลองฝึก 3 รอบ: เลี้ยงบอลช้า ๆ 1 นาที, ส่งบอลกับกำแพง 20 ครั้ง และพัก 30 วินาที เน้นมองขึ้นก่อนส่งบอล',
+    en: 'Try 3 rounds: dribble slowly for 1 minute, make 20 wall passes, then rest 30 seconds. Keep your eyes up before each pass.'
+  };
+  if (query.includes('วอลเลย์') || query.includes('volley')) return {
+    th: 'เริ่มด้วยการเซตบอลเหนือศีรษะ 20 ครั้ง แล้วฝึกรับลูกกับกำแพง 10 ครั้งต่อข้าง งอเข่าและยกมือให้เร็ว',
+    en: 'Start with 20 overhead sets, then practise 10 wall receives on each side. Bend your knees and raise your hands early.'
+  };
+  if (query.includes('บาส') || query.includes('basket')) return {
+    th: 'ฝึกเลี้ยงบอลมือซ้ายและขวาข้างละ 30 วินาที แล้วชู้ตระยะใกล้ 10 ลูกต่อข้าง พยายามให้ข้อมือตามลูกบอล',
+    en: 'Dribble with each hand for 30 seconds, then take 10 close shots from each side. Let your wrist follow through.'
+  };
+  return {
+    th: 'ดีเลย! เริ่มจากวอร์มอัป 5 นาที แล้วฝึกท่านั้น 3 เซต เซตละ 8–12 ครั้ง พัก 45 วินาที และบอกฉันได้ว่าท่าไหนยังยาก',
+    en: 'Great! Warm up for 5 minutes, then practise that skill for 3 sets of 8–12 reps. Rest 45 seconds and tell me which part feels difficult.'
+  };
+}
+
+async function requestClaudeCoachReply(){
+  const history = coachMessages.slice(-8).map(message => ({
+    role: message.role === 'coach' ? 'assistant' : 'user',
+    content: message[coachLanguage] || message.th || message.en
+  }));
+  const response = await fetch('/api/ai-coach', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ history, language: coachLanguage })
+  });
+  if (!response.ok) throw new Error('AI coach server is unavailable');
+  const data = await response.json();
+  if (!data.th || !data.en) throw new Error('Invalid AI response');
+  return { role: 'coach', th: data.th, en: data.en };
+}
+
+async function sendCoachMessage(event){
+  event.preventDefault();
+  const input = document.getElementById('coach-input');
+  const text = input.value.trim();
+  if (!text) return;
+  coachMessages.push({ role: 'user', th: text, en: text });
+  input.value = '';
+  input.disabled = true;
+  renderCoachChat();
+  try {
+    coachMessages.push(await requestClaudeCoachReply());
+  } catch (_) {
+    // Local fallback if the AI call fails, so the chat stays usable.
+    coachMessages.push({ role: 'coach', ...getCoachReply(text) });
+  } finally {
+    input.disabled = false;
+    input.focus();
+  }
+  saveCoachMessages();
+  renderCoachChat();
+}
+
+// Video analysis: the browser samples a few frames from the clip and uploads
+// them to our own /api/analyze-basketball backend, which forwards them to
+// Claude for a live estimate. This is an AI estimate, not an official match
+// statistic — accuracy depends on what's visible in the sampled frames.
+let analysisVideoFile = null;
+
+function selectAnalysisVideo(input){
+  analysisVideoFile = input.files?.[0] || null;
+  document.getElementById('analysis-file-name').textContent = analysisVideoFile
+    ? `เลือกคลิปแล้ว: ${analysisVideoFile.name}`
+    : 'รองรับ MP4, MOV, WebM · แนะนำคลิปสั้นและสว่าง';
+}
+
+function waitForVideo(video, event){
+  return new Promise((resolve, reject) => {
+    video.addEventListener(event, resolve, { once:true });
+    video.addEventListener('error', () => reject(new Error('เปิดวิดีโอไม่ได้')), { once:true });
+  });
+}
+
+async function extractAnalysisFrames(file){
+  const video = document.createElement('video');
+  video.muted = true;
+  video.playsInline = true;
+  video.preload = 'metadata';
+  const source = URL.createObjectURL(file);
+  video.src = source;
+  try {
+    await waitForVideo(video, 'loadedmetadata');
+    const canvas = document.createElement('canvas');
+    const scale = Math.min(1, 1024 / video.videoWidth);
+    canvas.width = Math.max(1, Math.round(video.videoWidth * scale));
+    canvas.height = Math.max(1, Math.round(video.videoHeight * scale));
+    const context = canvas.getContext('2d');
+    const times = [0.08, 0.28, 0.5, 0.72, 0.92].map(part => Math.max(0, (video.duration || 0) * part));
+    const frames = [];
+    for (const time of times) {
+      video.currentTime = time;
+      await waitForVideo(video, 'seeked');
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', .72));
+      if (blob) frames.push(blob);
+    }
+    return frames;
+  } finally {
+    URL.revokeObjectURL(source);
+  }
+}
+
+function renderBasketballAnalysis(data){
+  const made = Math.max(0, Number(data.made) || 0);
+  const attempts = Math.max(made, Number(data.attempts) || 0);
+  const two = Math.min(made, Math.max(0, Number(data.two) || 0));
+  const three = Math.min(made - two, Math.max(0, Number(data.three) || 0));
+  const points = two * 2 + three * 3;
+  const accuracy = attempts ? Math.round(made / attempts * 100) : 0;
+  const rhythm = Math.min(100, Math.max(0, Number(data.rhythm) || 0));
+  const score = Math.round(accuracy * .7 + rhythm * .3);
+  document.getElementById('analysis-score').textContent = score;
+  document.getElementById('analysis-headline').textContent = data.note || `ชู้ตลง ${made} ลูก ได้ ${points} คะแนน`;
+  document.getElementById('analysis-makes').textContent = `${made} / ${attempts} (${accuracy}%)`;
+  document.getElementById('analysis-points').textContent = `${points} คะแนน (${two}x2, ${three}x3)`;
+  document.getElementById('analysis-rhythm').textContent = `${rhythm}%`;
+  document.getElementById('analysis-accuracy-bar').style.width = `${accuracy}%`;
+  document.getElementById('analysis-points-bar').style.width = `${Math.min(100, points * 5)}%`;
+  document.getElementById('analysis-rhythm-bar').style.width = `${rhythm}%`;
+  const ring = document.querySelector('#screen-score .ring');
+  if (ring) ring.style.background = `conic-gradient(var(--ink) 0deg ${score * 3.6}deg, var(--line) ${score * 3.6}deg 360deg)`;
+}
+
+async function analyzeBasketballVideo(){
+  if (!analysisVideoFile) return showToast('กรุณาเลือกหรือบันทึกวิดีโอก่อน');
+  const button = document.getElementById('analysis-button');
+  button.disabled = true;
+  button.textContent = 'กำลังดึงภาพจากคลิป...';
+  try {
+    const frames = await extractAnalysisFrames(analysisVideoFile);
+    if (!frames.length) throw new Error('ดึงภาพจากคลิปไม่สำเร็จ ลองใช้คลิปอื่น');
+
+    button.textContent = 'AI กำลังวิเคราะห์...';
+    const form = new FormData();
+    frames.forEach((frame, index) => form.append('frames', frame, `frame-${index + 1}.jpg`));
+    const response = await fetch('/api/analyze-basketball', { method: 'POST', body: form });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'วิเคราะห์ไม่สำเร็จ');
+    renderBasketballAnalysis(data);
+    navigateTo('screen-score');
+  } catch (error) {
+    showToast(error.message || 'วิเคราะห์วิดีโอไม่สำเร็จ');
+  } finally {
+    button.disabled = false;
+    button.textContent = 'เริ่มวิเคราะห์';
+  }
+}
+
+// start app
+const savedAccount = getSavedAccount();
+if (savedAccount) updateProfileUI(savedAccount.name, savedAccount.email);
+renderCoachChat();
+navigateTo('screen-splash');
+</script>
+</body>
+</html>
